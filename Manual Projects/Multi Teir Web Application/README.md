@@ -80,6 +80,12 @@ To ensure proper setup, follow the provisioning order below:
     sudo mysql_secure_installation
     ```
    Follow the prompts to set the root password and configure security settings.
+   - Switch to unix_socket authentication [Y/n] **Y**
+   - Change the root password? [Y/n] **Y**
+   - Remove anonymous users? [Y/n] **Y**
+   - Disallow root login remotely? [Y/n] **N**
+   - Remove test database and access to it? [Y/n] **Y**
+   - Reload privilege tables now? [Y/n] **Y**
 
 5. Create the database and user:
     ```bash
@@ -92,12 +98,15 @@ To ensure proper setup, follow the provisioning order below:
 6. Initialize the database with the project schema:
     ```bash
     git clone -b main https://github.com/pankaj-bidikar/devops_projects.git
-    cd "Manual Projects"/"Multi Teir Web Application"
-    mysql -u root -p accounts < src/main/resources/db_backup.sql
+    cd .../"Manual Projects"/"Multi Teir Web Application"
+    mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
+	mysql -u root -padmin123 accounts
     ```
 7. Start the firewall and allow access to MariaDB:
     ```bash
     sudo systemctl start firewalld
+	systemctl enable firewalld
+	firewall-cmd --get-active-zones
     sudo firewall-cmd --zone=public --add-port=3306/tcp --permanent
     sudo firewall-cmd --reload
     sudo systemctl restart mariadb
@@ -139,6 +148,9 @@ To ensure proper setup, follow the provisioning order below:
     ```bash
     sudo yum update -y
     sudo yum install epel-release wget -y
+	sudo yum Install wget -y
+	cd /tmp/
+	sudo dnf -y install centos-release-rabbitmq-38
     sudo dnf --enablerepo=centos-rabbitmq-38 -y install rabbitmq-server
     sudo systemctl enable --now rabbitmq-server
     ```
