@@ -158,17 +158,22 @@ To ensure proper setup, follow the provisioning order below:
 	sudo dnf -y install centos-release-rabbitmq-38
     sudo dnf --enablerepo=centos-rabbitmq-38 -y install rabbitmq-server
     sudo systemctl enable --now rabbitmq-server
+	sudo systemctl status rabbitmq-server
     ```
 3. Create an admin user:
     ```bash
+	sudo sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.config'
     sudo rabbitmqctl add_user test test
     sudo rabbitmqctl set_user_tags test administrator
     sudo systemctl restart rabbitmq-server
+	sudo systemctl status rabbitmq-server
     ```
 4. Open the firewall for RabbitMQ:
     ```bash
+	sudo systemctl start firewalld
     sudo firewall-cmd --add-port=5672/tcp --permanent
     sudo firewall-cmd --reload
+	sudo systemctl status rabbitmq-server
     ```
 
 ### 4. Tomcat Setup
@@ -197,6 +202,25 @@ To ensure proper setup, follow the provisioning order below:
     sudo vi /etc/systemd/system/tomcat.service
     ```
    Add the service configuration as provided in the document.
+   ```bash
+    [Unit]
+    Description=Tomcat
+    After=network.target
+	
+    [Service]
+    User=tomcat
+    WorkingDirectory=/usr/local/tomcat
+    Environment=JRE_HOME=/usr/lib/jvm/jre
+    Environment=JAVA_HOME=/usr/lib/jvm/jre
+    Environment=CATALINA_HOME=/usr/local/tomcat
+    Environment=CATALINE_BASE=/usr/local/tomcat
+    ExecStart=/usr/local/tomcat/bin/catalina.sh run
+    ExecStop=/usr/local/tomcat/bin/shutdown.sh
+    SyslogIdentifier=tomcat-%i
+	
+    [Install]
+    WantedBy=multi-user.target
+   ```
 
 5. Start and enable Tomcat:
     ```bash
@@ -204,16 +228,28 @@ To ensure proper setup, follow the provisioning order below:
     sudo systemctl start tomcat
     sudo systemctl enable tomcat
     ```
+6. Enabling the firewall and allowing port 8080 to access the tomcat
+    ```bash
+    sudo systemctl start firewalld
+    sudo systemctl enable firewalld
+    sudo firewall-cmd --get-active-zones
+    sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent
+    sudo firewall-cmd --reload
+    sudo systemctl status firewalld
+    ```
 
-6. Deploy the application:
+7. Deploy the application:
     ```bash
     git clone -b main https://github.com/pankaj-bidikar/devops_projects.git
     cd "Manual Projects"/"Multi Teir Web Application"
+	vi src/main/resources/application.properties
     mvn install
     sudo systemctl stop tomcat
     sudo rm -rf /usr/local/tomcat/webapps/ROOT*
-    sudo cp target/'Multi Teir Web Application'-v2.war /usr/local/tomcat/webapps/ROOT.war
+    sudo cp target/Multi Teir Web Application-v2.war /usr/local/tomcat/webapps/ROOT.war
     sudo systemctl start tomcat
+	sudo chown tomcat.tomcat /usr/local/tomcat/webapps -R
+    sudo systemctl restart tomcat
     ```
 
 ### 5. Nginx Setup
