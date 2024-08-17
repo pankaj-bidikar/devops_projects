@@ -230,4 +230,4 @@ To ensure proper setup, follow the provisioning order below:
 ---
 ## Authors
 
-- [@Pankaj bidikar](https://www.github.com/pankaj-bidikar)
+[@Pankaj bidikar](https://www.github.com/pankaj-bidikar)
