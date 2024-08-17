@@ -125,6 +125,7 @@ To ensure proper setup, follow the provisioning order below:
     sudo dnf install memcached -y
     sudo systemctl start memcached
     sudo systemctl enable memcached
+	sudo systemctl status memcached
     ```
 3. Configure Memcached to listen on all network interfaces:
     ```bash
@@ -133,9 +134,13 @@ To ensure proper setup, follow the provisioning order below:
     ```
 4. Open the firewall for Memcached:
     ```bash
-    sudo firewall-cmd --add-port=11211/tcp --permanent
+    sudo systemctl start firewalld
+	sudo firewall-cmd --add-port=11211/tcp --permanent
+	sudo firewall-cmd --runtime-to-permanent
     sudo firewall-cmd --add-port=11111/udp --permanent
+	sudo firewall-cmd --runtime-to-permanent
     sudo firewall-cmd --reload
+	sudo systemctl status firewalld
     ```
 
 ### 3. RabbitMQ Setup
