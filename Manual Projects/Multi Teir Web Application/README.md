@@ -268,9 +268,21 @@ To ensure proper setup, follow the provisioning order below:
     sudo vi /etc/nginx/sites-available/vproapp
     ```
    Add the configuration details provided in the document.
+    ```bash
+    upstream vproapp {
+    server app01:8080;
+    }
+    server {
+    listen 80;
+    location / {
+    proxy_pass http://vproapp;
+    }
+    }
+    ```
 
 4. Enable the site and restart Nginx:
     ```bash
+	rm -rf /etc/nginx/sites-enabled/default
     sudo ln -s /etc/nginx/sites-available/vproapp /etc/nginx/sites-enabled/vproapp
     sudo systemctl restart nginx
     ```
